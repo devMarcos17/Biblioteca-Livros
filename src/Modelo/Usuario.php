@@ -4,7 +4,13 @@ namespace Marcos\Modelo;
 class Usuario
 {
     public ?int $id;
-    public function __construct(public readonly string $nome, private string $email, private string $senha, private string $role = "user", ?int $id = null)
+    public function __construct(
+        public readonly string $nome, 
+        private string $email, 
+        private string $senha, 
+        private string $role = "user", 
+        ?int $id = null
+        )
     {
         $this->id = $id;
         
@@ -19,7 +25,7 @@ class Usuario
     }
     public function getRole(): string
     {
-        return $this->senha;
+        return $this->role;
     }
 }
 ?>

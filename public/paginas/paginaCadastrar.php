@@ -154,7 +154,7 @@ button:hover{
     </form>
 
     <div class="links">
-        <a href="index.php">Já possui uma conta?</a>
+        <a href="paginaEntrar.php">Já possui uma conta?</a>
     </div>
 
     <div class="quote">

@@ -4,7 +4,7 @@ session_start();
 
 if (!isset($_SESSION["usuario"])) {
   unset($_SESSION["usuario"]);
-    header("Location: /paginas/paginaEntrar.php");
+    header("Location: paginaEntrar.php");
     exit();
 }
 
@@ -129,6 +129,7 @@ h1{
         <a href="paginaLivro.php?genero=FANTASIA">🧙 Fantasia</a>
         <a href="paginaLivro.php?genero=ROMANCE">❤️ Romance</a>
         <a href="paginaLivro.php?genero=TERROR">👻 Terror</a>
+        <a href="paginaBiblioteca.php">Minha Biblioteca</a>
     </div>
 
 </div>

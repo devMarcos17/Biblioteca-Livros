@@ -7,23 +7,26 @@ use Marcos\Modelo\Livro;
 require_once __DIR__ . "/../../config/autoload.php";
 require_once __DIR__ . "/../../config/config.php";
 
-$id = $_GET['id'] ?? null;
+session_start();
 
+$id = $_GET['id'] ?? null;
+$idUsuario = $_SESSION["usuario"]["id"];
 
 if (!$id) {
-    die("Livro não encontrado.");
+    die("ERRO: ID DO LIVRO NAO FOI ENCONTRADO");
 }
+$listar = new ListarLivro($conexao);
+$livros = $listar->listarLivroID($id);
+foreach ($livros as $livro) {
+}
+
 $baixarArquivo = new BaixarArquivoPdf($conexao);
-$dadosPDF = $baixarArquivo->baixarPDF($id);
+$dadosPDF = $baixarArquivo->baixarPDF((string)$id);
 if ($livro) {
     $nome = $dadosPDF['nome_arquivo'];
     $url  = $dadosPDF['url_arquivo'];
 }
 
-$listar = new ListarLivro($conexao);
-$livros = $listar->listarLivroID($id);
-foreach ($livros as $livro) {
-}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -34,13 +37,6 @@ foreach ($livros as $livro) {
     <title>Biblioteca</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -65,8 +61,9 @@ foreach ($livros as $livro) {
         .container {
             max-width: 1200px;
             margin: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: flex;
+            justify-content: center;
+            align-items: center;
             gap: 25px;
         }
 
@@ -77,13 +74,11 @@ foreach ($livros as $livro) {
             border: 1px solid rgba(168, 85, 247, .2);
             box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
             transition: .3s;
-
-            /* ALTERADO: Aumentamos o limite para um tamanho confortável de card de livro */
             width: 100%;
-            max-width: 320px;
+            /* AJUSTADO: Card maior para acomodar melhor os detalhes e botões */
+            max-width: 400px; 
             margin: auto;
             position: relative;
-            /* Mantido para os botões absolutos */
         }
 
         .card:hover {
@@ -95,20 +90,17 @@ foreach ($livros as $livro) {
         .card img {
             max-width: 100%;
             width: auto;
-            /* Ajuste a altura máxima para a capa não esticar infinitamente */
-            max-height: 380px;
+            /* AJUSTADO: Altura proporcional ao novo tamanho do card */
+            max-height: 450px; 
             display: block;
             margin: 20px auto;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             object-fit: contain;
-            /* Garante que a imagem não distorça */
-
-
         }
 
         .card-content {
-            padding: 20px;
+            padding: 24px;
         }
 
         .card-id {
@@ -123,144 +115,86 @@ foreach ($livros as $livro) {
         }
 
         .card-title {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #F3E8FF;
             margin-bottom: 15px;
         }
 
         .info {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: #D4D4D8;
             font-size: .95rem;
+            line-height: 1.5;
         }
 
         .info strong {
             color: #C084FC;
         }
 
-        @media (max-width:600px) {
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .card img {
-                height: 280px;
-            }
-
-        }
-
-        .search-form {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin: 30px 0;
-        }
-
-        .search-form input[type="text"] {
-            width: 350px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 30px;
-            outline: none;
-            font-size: 16px;
-            transition: 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .search-form input[type="text"]:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .search-form input[type="submit"] {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s ease;
-        }
-
-        .search-form input[type="submit"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
-        }
-
-        .search-form input[type="submit"]:active {
-            transform: translateY(0);
-        }
-
-        .top-buttons {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* BOTÕES NO CANTINHO DIREITO */
+        /* AJUSTADO: Grid de 2 colunas para alinhar os botões perfeitamente */
         .card-buttons {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-
-            display: flex;
-            gap: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
         }
 
-        /* BOTÃO PRINCIPAL */
+        /* AJUSTADO: Botões flexíveis com preenchimento idêntico */
         .btn-card {
             background: linear-gradient(135deg, #7c3aed, #4f46e5);
             color: white;
             text-decoration: none;
-
-            padding: 8px 12px;
+            padding: 12px;
             border-radius: 12px;
-
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
-
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
             transition: 0.3s ease;
-
-            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
         }
 
-        /* HOVER */
         .btn-card:hover {
-            transform: translateY(-2px) scale(1.05);
+            transform: translateY(-2px) scale(1.02);
             box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
         }
 
-        /* BOTÃO SECUNDÁRIO */
-        .btn-card.secondary {
-            background: linear-gradient(135deg, #7c3aed, #4f46e5);
-            color: white;
-            text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+        /* Estilo customizado para o botão de remoção */
+        .btn-card.danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+        }
+        .btn-card.safe{
+            background: linear-gradient(135deg, #179030, #128f38);
+        }
+        
+        .btn-card.danger:hover {
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4);
         }
 
-        /* HOVER SECUNDÁRIO */
-        .btn-card.secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
+        /* Formulários adaptados para ocupar a grade corretamente */
+        .card-buttons form {
+            margin: 0;
+            width: 100%;
+        }
+
+        @media (max-width:600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .card img {
+                height: 320px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    </div>
     <div class="container">
 
         <?php foreach ($livros as $item) { ?>
@@ -294,26 +228,38 @@ foreach ($livros as $livro) {
                         <strong>Preço:</strong>
                         <?php echo $item['preco']; ?> R$
                     </p>
-                     <p class="info">
+                    
+                    <p class="info">
                         <strong>Sobre:</strong>
-                        <?php echo $item['descricao']; ?> 
+                        <?php echo $item['descricao']; ?>
                     </p>
 
-                    <!-- BOTÕES DENTRO DO CARD -->
                     <div class="card-buttons">
-                        <a href="../uploads/<?= $livro['url_arquivo'] ?>" download class="btn-card">
+                        <a href="../uploads/<?= $url ?>" download class="btn-card">
                             Baixar PDF
                         </a>
+
+                        <a href="../uploads/<?= $url ?>" target="_blank" class="btn-card">
+                            Ver PDF
+                        </a>
+
+                        <form action="../controle/processarBiblioteca.php" method="POST">
+                            <input type="hidden" name="livro_id" value="<?php echo $item['id']; ?>">
+                            <input type="hidden" name="usuario_id" value="<?php echo $idUsuario; ?>">
+                            <button type="submit" class="btn-card safe" style="cursor: pointer; border: none;">Salvar</button>
+                        </form>
+
+                        <form action="../controle/processarDeletarBibiblioteca.php" method="POST">
+                            <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                            <button type="submit" class="btn-card danger" style="cursor: pointer; border: none;">Remover</button>
+                        </form>
                     </div>
 
-                    <a href="../uploads/<?= $livro['url_arquivo'] ?>" class="btn-card secondary">
-                        Ver PDF
-                    </a>
                 </div>
-
             </div>
+
+        <?php } ?>
+
     </div>
-
-<?php } ?>
-
-</div>
+</body>
+</html>

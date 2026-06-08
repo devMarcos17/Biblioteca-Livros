@@ -1,4 +1,5 @@
 <?php
+
 namespace Marcos\Modelo;
 
 use PDO;
@@ -8,7 +9,7 @@ class CadastrarLivro
     private PDO $conexao;
     public function __construct(PDO $conexao)
     {
-     $this->conexao = $conexao;
+        $this->conexao = $conexao;
     }
     public function cadastrarLivro(Livro $livro): bool
     {
@@ -33,10 +34,22 @@ class CadastrarLivro
         $stmt->bindParam(8, $url_arquivo);
 
         $ucesso = $stmt->execute();
-        if($ucesso){
+        if ($ucesso) {
             return true;
         }
         return false;
     }
+    public function cadastrarFavorito( int $idUsuario, int $idLivro): bool
+    {
+        $checarQuery = "SELECT COUNT(*) FROM favoritos WHERE id_usuario = ? AND id_livro = ?";
+    $cheacarStmt = $this->conexao->prepare($checarQuery);
+    $cheacarStmt->execute([$idUsuario, $idLivro]);
+    
+    if ($cheacarStmt->fetchColumn() > 0) {
+        return true; 
+    }
+    $query = "INSERT INTO favoritos (id_usuario, id_livro) VALUES (?, ?)";
+    $stmt = $this->conexao->prepare($query);
+    return $stmt->execute([$idUsuario, $idLivro]);
+    }
 }
-?>

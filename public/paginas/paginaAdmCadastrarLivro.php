@@ -1,3 +1,23 @@
+<?php
+session_start();
+
+if (!isset($_SESSION["usuario"])) {
+    header("Location: /paginas/paginaEntrar.php");
+    exit();
+}
+
+
+$role = $_SESSION["usuario"]["role"] ?? null;
+
+if ($role !== "admin") {
+    header("Location: paginaInici   al.php?erro=acesso_negado");
+    exit();
+}
+
+
+$nome = $_SESSION["nome"];
+echo $nome;
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

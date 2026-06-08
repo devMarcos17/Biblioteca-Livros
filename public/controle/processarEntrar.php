@@ -24,11 +24,11 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
         "email" => $sucesso["email"],
         "role" => $sucesso["role"],
     ];
-        header("Location: /paginas/paginaInicial.php?autenticar=true");
+        header("Location: ../paginas/paginaInicial.php?autenticar=true");
         exit();
     }
    unset($_SESSION["usuario"]);
-    header("Location: /paginas/paginaEntrar.php?credenciaisInvalida");
+    header("Location: ../paginas/paginaEntrar.php?credenciaisInvalida");
     exit();
 }
 ?>

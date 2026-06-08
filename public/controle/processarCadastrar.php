@@ -17,10 +17,10 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     $cadastrar = new CadastrarUsuario($conexao);
     $sucesso = $cadastrar->cadastrarUsuario($usuario);
     if($sucesso){
-        header("Location: /paginas/paginaEntrar.php?cadastrar=true");
+        header("Location: ../paginas/paginaEntrar.php?cadastrar=true");
         exit();
     }
-    header("Location: /paginas/paginaEntrar.php?cadastrar=false");
+    header("Location: ../paginas/Cadastrar.php?cadastrar=false");
     exit();
-}
+    }
 ?>

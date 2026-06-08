@@ -1,4 +1,5 @@
 <?php
+
 namespace Marcos\Modelo;
 
 use PDO;
@@ -8,30 +9,30 @@ class ListarLivro
     private PDO $conexao;
     public function __construct(PDO $conexao)
     {
-     $this->conexao = $conexao;
+        $this->conexao = $conexao;
     }
     public function listarLivro($genero = null): array
     {
-        
-    if ($genero !== null) {
-        $query = "SELECT id, nome, genero, autor, preco, imagem, descricao FROM livros WHERE genero = :genero ORDER BY nome ASC";
-        $stmt = $this->conexao->prepare($query);
 
-        $stmt->bindValue(':genero', $genero);
-    } else {
-        $query = "SELECT id, nome, genero, autor, preco, imagem FROM livros";
-        $stmt = $this->conexao->prepare($query);
-    }
+        if ($genero !== null) {
+            $query = "SELECT id, nome, genero, autor, preco, imagem, descricao FROM livros WHERE genero = :genero ORDER BY nome ASC";
+            $stmt = $this->conexao->prepare($query);
 
-    $stmt->execute();
-    $livros = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    return $livros; 
+            $stmt->bindValue(':genero', $genero);
+        } else {
+            $query = "SELECT id, nome, genero, autor, preco, imagem FROM livros";
+            $stmt = $this->conexao->prepare($query);
+        }
+
+        $stmt->execute();
+        $livros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $livros;
     }
 
 
     public function buscarLivro(string $nome): array
     {
-         $nome = "%" . $nome . "%";
+        $nome = "%" . $nome . "%";
 
         $query = "SELECT id, nome, genero, autor, preco, imagem
               FROM livros 
@@ -49,21 +50,30 @@ class ListarLivro
         $livros = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $livros;
     }
-    public function listarLivroID($id)
+    public function listarLivroID(int $id): array
     {
         $query = "SELECT * FROM livros WHERE id = ?";
         $stmt = $this->conexao->prepare($query);
         $stmt->bindParam(1, $id);
         $stmt->execute();
         $sucesso = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if(!$sucesso){
+        if (empty($sucesso)){
             die("Livro não encotrado");
         }
         return $sucesso;
-        
+    }
+    public function listarBiblioteca(int $idUsuario): array
+    {
+        $query = "SELECT livros.* FROM livros 
+          INNER JOIN favoritos ON livros.id = favoritos.id_livro 
+          WHERE favoritos.id_usuario = ?
+          ORDER BY livros.nome ASC";
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(1, $idUsuario, PDO::PARAM_INT);
+        $stmt->execute([$idUsuario]);
 
+        $sucesso = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $sucesso;
     }
 }
-
-
-?>

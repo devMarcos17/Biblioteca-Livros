@@ -22,7 +22,6 @@ class BaixarArquivoPdf
         if($livros){
             return $livros;
         }
-        return null;
     }
 }
 ?>
